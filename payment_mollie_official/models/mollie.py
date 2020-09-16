@@ -125,7 +125,7 @@ class TxMollie(models.Model):
 
         tx = self._mollie_form_get_tx_from_data(data)
 
-        transactionId = tx['acquirer_reference']
+        transactionId = tx.acquirer_reference
 
         _logger.info('Validated transfer payment for tx %s: set as pending' % (reference))
         mollie_api_key = acquirer._get_mollie_api_keys(acquirer.environment)['mollie_api_key']
@@ -150,8 +150,14 @@ class TxMollie(models.Model):
         data = {}
         status = 'undefined'
         mollie_reference = ''
-        if len(data_list) > 0:
-            data = data_list[0]
+        for vals in data_list:
+            if (
+                isinstance(vals, dict)
+                and vals.get("id", False)
+                and vals["id"] == transactionId
+            ):
+                data = vals
+                break
 
         if "status" in data:
             status = data["status"]
