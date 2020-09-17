@@ -40,9 +40,19 @@ class PaymentAcquirer(models.Model):
 
     @api.model
     def _get_main_mollie_provider(self):
+        """ add company id in search #20414 """
         return (
             self.sudo().search(
-                [("provider", "=", "mollie")], order="id", limit=1
+                [
+                    ("provider", "=", "mollie"),
+                    (
+                        "company_id",
+                        "=",
+                        self.env.context.get("force_company", False),
+                    ),
+                ],
+                order="id",
+                limit=1,
             )
             or False
         )

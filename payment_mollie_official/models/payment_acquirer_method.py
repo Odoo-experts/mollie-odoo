@@ -12,13 +12,19 @@ def get_base_url(env):
     return base_url
 
 
-def get_mollie_provider(env):
-    provider = env["payment.acquirer"].sudo()._get_main_mollie_provider()
+def get_mollie_provider(env, company_id=False):
+    """ passes company id in context #20414 """
+    provider = env["payment.acquirer"].sudo().with_context(
+        force_company=company_id
+    )._get_main_mollie_provider()
     return provider
 
 
-def get_mollie_provider_key(env):
-    provider = env["payment.acquirer"].sudo()._get_main_mollie_provider()
+def get_mollie_provider_key(env, company_id=False):
+    """ passes company id in context #20414 """
+    provider = env["payment.acquirer"].sudo().with_context(
+        force_company=company_id
+    )._get_main_mollie_provider()
     key = provider._get_mollie_api_keys(provider.state)["mollie_api_key"]
     return key
 

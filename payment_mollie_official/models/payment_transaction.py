@@ -87,7 +87,11 @@ class PaymentTransaction(models.Model):
             self._set_transaction_done()
             return self.write(res)
 
-        elif status in ["canceled", "expired", "failed"]: # In the v1 API, canceled status was misspelled as cancelled [19430].
+        elif status in [
+            "canceled",
+            "expired",
+            "failed",
+        ]:  # In the v1 API, canceled status was misspelled as cancelled [19430].
             self._set_transaction_cancel()
             return self.write(res)
 
@@ -312,7 +316,12 @@ class PaymentTransaction(models.Model):
             return False
 
     def mollie_order_sync(self, key=False):
-        key = get_mollie_provider_key(self.env)
+        """ passes company id in context #20414 """
+        company_id = (
+            self.sale_order_ids[:1].company_id
+            or self.invoice_ids[:1].company_id
+        )
+        key = get_mollie_provider_key(self.env, company_id=company_id.id)
         try:
             self._mollie_client.set_api_key(key)
             response = False
