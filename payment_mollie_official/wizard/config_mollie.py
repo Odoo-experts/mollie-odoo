@@ -13,7 +13,12 @@ class ConfigMollie(models.TransientModel):
     _description = "Set up config mollie"
 
     def _get_default_acquirer_id(self):
-        return self.env["payment.acquirer"]._get_main_mollie_provider()
+        return (
+            self.env["payment.acquirer"]
+            .sudo()
+            .with_context(force_company=self.env.user.company_id.id)
+            ._get_main_mollie_provider()
+        )
 
     acquirer_id = fields.Many2one(
         "payment.acquirer",

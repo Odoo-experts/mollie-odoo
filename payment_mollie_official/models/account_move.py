@@ -26,8 +26,13 @@ class AccountMove(models.Model):
                 continue
 
             provider = (
-                self.env["payment.acquirer"].sudo()._get_main_mollie_provider()
+                self.env["payment.acquirer"]
+                .sudo()
+                .with_context(force_company=self.company_id.id)
+                ._get_main_mollie_provider()
             )
+            if not provider:
+                continue
             key = provider._get_mollie_api_keys(provider.state)[
                 "mollie_api_key"
             ]
@@ -63,8 +68,13 @@ class AccountMove(models.Model):
     def mollie_refund_orders_create(self):
         self.ensure_one()
         provider = (
-            self.env["payment.acquirer"].sudo()._get_main_mollie_provider()
+            self.env["payment.acquirer"]
+            .sudo()
+            .with_context(force_company=self.company_id.id)
+            ._get_main_mollie_provider()
         )
+        if not provider:
+            return
         key = provider._get_mollie_api_keys(provider.state)["mollie_api_key"]
         self._mollie_client.set_api_key(key)
 
